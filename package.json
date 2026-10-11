@@ -1,0 +1,14 @@
+{
+  "name": "scrapconnect",
+  "version": "1.0.0",
+  "description": "ScrapConnect - Useful Scrap Collection Marketplace with Location-Based Discovery",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3000 --host",
+    "build": "vite build",
+    "preview": "vite preview --port 3000"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

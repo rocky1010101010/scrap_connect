@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScrapConnect — Location-Based Scrap Collection Marketplace</title>
+  <meta name="description" content="Location-based circular scrap collection marketplace connecting sellers, buyers, and NGOs with proximity-driven discovery (SDG 12 & SDG 11)." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Leaflet CSS for Map Exploration -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- =========================================================================
+       Top Showcase & Control Bar
+       ========================================================================= -->
+  <header class="top-showcase-bar">
+    <div class="brand-section">
+      <div class="brand-logo-badge" title="Circular Economy Recycling">♻</div>
+      <div class="brand-text">
+        <h1>ScrapConnect</h1>
+        <p>Location-Based Scrap Discovery & NGO Sourcing</p>
+      </div>
+      <div class="sdg-pills-row">
+        <span class="sdg-badge sdg-12" title="Responsible Consumption and Production">SDG 12</span>
+        <span class="sdg-badge sdg-11" title="Sustainable Cities and Communities">SDG 11</span>
+      </div>
+    </div>
+
+    <div class="controller-actions">
+      <!-- View Mode Switcher -->
+      <div class="view-mode-toggle" role="group" aria-label="View Mode">
+        <button id="btn-mode-triple" class="view-mode-btn active" title="Show all 3 screens side-by-side like the reference mockup">
+          <span>📱</span> Triple Wireframe View
+        </button>
+        <button id="btn-mode-single" class="view-mode-btn" title="Switch to unified full interactive app mode">
+          <span>💻</span> Unified App Mode
+        </button>
+      </div>
+
+      <!-- Current Location Selector -->
+      <button class="location-chip-btn action-change-location" title="Change your simulated or GPS location">
+        <span>📍</span> <span class="user-current-location-label">Kozhikode Center (11.4996, 75.7982)</span> ▾
+      </button>
+
+      <!-- Post Listing Action -->
+      <button id="btn-add-listing-header" class="btn-primary-action" title="List recyclable scrap as a seller">
+        <span>+</span> List Scrap
+      </button>
+
+      <!-- Premium Upgrade -->
+      <button class="location-chip-btn action-upgrade-premium" style="border-color:#ffe082; background:#fffdf5; color:#8c6b00;">
+        <span>👑</span> Premium
+      </button>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       Showcase Wrapper
+       ========================================================================= -->
+  <main class="showcase-wrapper">
+
+    <!-- Hero Context Banner -->
+    <section class="hero-context-banner">
+      <div class="hero-context-left">
+        <h2>Local Scrap Sourcing Engine with Proximity Ranking</h2>
+        <p>
+          Organizing the informal scrap economy through real-time <strong>Haversine great-circle distance sorting</strong>. 
+          The closest listings appear first, enabling buyers and NGOs to consolidate resources sustainably and cut procurement miles.
+        </p>
+      </div>
+      <div class="hero-stats-group">
+        <div class="hero-stat-item">
+          <span id="stat-total-kg" class="hero-stat-num">275 kg</span>
+          <span class="hero-stat-label">Active Scrap Listed</span>
+        </div>
+        <div class="hero-stat-item">
+          <span id="stat-co2-saved" class="hero-stat-num">783 kg</span>
+          <span class="hero-stat-label">CO2 Diversion Potential</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- App Container (Triple Mode vs Single Mode) -->
+    <div id="app-showcase-container" class="triple-mode">
+
+      <!-- =====================================================================
+           MODE A: TRIPLE WIREFRAME SCREENS (EXACT REPLICA OF USER REFERENCE)
+           ===================================================================== -->
+      <div class="app-screens-grid">
+
+        <!-- -----------------------------------------------------------------
+             PHONE 1: HOMEPAGE (Nearest listings first)
+             ----------------------------------------------------------------- -->
+        <div class="phone-card-column" id="phone-home">
+          <div class="smartphone-device">
+            <!-- Hardware Notch -->
+            <div class="phone-notch-bar">
+              <div class="phone-speaker"></div>
+              <div class="phone-camera-dot"></div>
+            </div>
+
+            <!-- Inner Screen -->
+            <div class="phone-inner-display">
+              <!-- App Bar -->
+              <div class="phone-app-header">
+                <h3>ScrapConnect</h3>
+                <div class="phone-header-sub action-change-location" style="cursor:pointer;" title="Click to change location">
+                  <span>📍</span> <span class="user-current-location-label">Kozhikode</span>
+                </div>
+              </div>
+
+              <!-- Scrollable Body -->
+              <div class="phone-body-content">
+                <!-- Search Input Pill -->
+                <div class="search-bar-input-box">
+                  <span class="search-icon-inside">🔍</span>
+                  <input
+                    type="text"
+                    id="home-search-input"
+                    class="search-input-pill"
+                    placeholder="Search scrap..."
+                    value=""
+                    autocomplete="off"
+                  />
+                </div>
+
+                <!-- Material Filter Chips -->
+                <div class="category-chips-scroll">
+                  <button class="category-chip active" data-cat="all">All</button>
+                  <button class="category-chip" data-cat="copper">Copper</button>
+                  <button class="category-chip" data-cat="cardboard">Cardboard</button>
+                  <button class="category-chip" data-cat="aluminium">Aluminium</button>
+                  <button class="category-chip" data-cat="ewaste">E-Waste</button>
+                </div>
+
+                <!-- Section Title -->
+                <div class="section-label-bold">
+                  <span>Nearest to you</span>
+                  <span class="section-sub-action action-change-location">Set Pin</span>
+                </div>
+
+                <!-- Listings Feed Container -->
+                <div id="home-listings-container" class="listings-vertical-list">
+                  <!-- Populated dynamically by app.js (S1: Copper Wire, S3: Cardboard, S4: Aluminium, S2: Copper Wire) -->
+                </div>
+
+                <!-- NGO Bulk Order Banner -->
+                <div class="ngo-bulk-callout" onclick="window.scrollToScreen('phone-bulk')">
+                  <strong>NGO Bulk Order</strong>
+                  <span>Request large quantities</span>
+                </div>
+
+                <!-- Premium Delivery Banner -->
+                <div class="premium-banner-dynamic">
+                  <!-- Populated dynamically -->
+                </div>
+              </div>
+
+              <!-- Phone Bottom Navigation -->
+              <nav class="phone-bottom-nav">
+                <button class="app-nav-item active" data-target-tab="home">Home</button>
+                <button class="app-nav-item" data-target-tab="search">Search</button>
+                <button class="app-nav-item" data-target-tab="orders">Orders</button>
+              </nav>
+            </div>
+          </div>
+
+          <div class="phone-column-caption">
+            Homepage — nearest listings first
+          </div>
+        </div>
+
+        <!-- -----------------------------------------------------------------
+             PHONE 2: SEARCH RESULTS (Nearest match ranked first)
+             ----------------------------------------------------------------- -->
+        <div class="phone-card-column" id="phone-search">
+          <div class="smartphone-device">
+            <!-- Hardware Notch -->
+            <div class="phone-notch-bar">
+              <div class="phone-speaker"></div>
+              <div class="phone-camera-dot"></div>
+            </div>
+
+            <!-- Inner Screen -->
+            <div class="phone-inner-display">
+              <!-- App Bar -->
+              <div class="phone-app-header">
+                <h3>Search Results</h3>
+                <div class="phone-header-sub">Keyword Proximity Filter</div>
+              </div>
+
+              <!-- Scrollable Body -->
+              <div class="phone-body-content">
+                <!-- Search Box with Green Border (matching wireframe) -->
+                <div class="search-query-border-box">
+                  <span style="color:#23702b; font-size:14px;">🔍</span>
+                  <input
+                    type="text"
+                    id="results-search-input"
+                    class="search-active-input"
+                    placeholder="Search scrap material..."
+                    value="copper"
+                  />
+                </div>
+
+                <!-- Sorted by distance label -->
+                <div class="search-results-meta">
+                  <span class="sorted-by-label">Sorted by distance</span>
+                  <span id="search-matches-count" class="search-matches-count">2 listings found</span>
+                </div>
+
+                <!-- Search Results Vertical List -->
+                <div id="search-results-container" class="listings-vertical-list">
+                  <!-- Populated dynamically (S1: Copper Wire [0.2 km] View, S2: Copper Wire [24.7 km] View) -->
+                </div>
+              </div>
+
+              <!-- Phone Bottom Navigation -->
+              <nav class="phone-bottom-nav">
+                <button class="app-nav-item" data-target-tab="home">Home</button>
+                <button class="app-nav-item active" data-target-tab="search">Search</button>
+                <button class="app-nav-item" data-target-tab="orders">Orders</button>
+              </nav>
+            </div>
+          </div>
+
+          <div class="phone-column-caption">
+            Search — nearest match ranked first
+          </div>
+        </div>
+
+        <!-- -----------------------------------------------------------------
+             PHONE 3: NGO BULK ORDER (Feasibility check)
+             ----------------------------------------------------------------- -->
+        <div class="phone-card-column" id="phone-bulk">
+          <div class="smartphone-device">
+            <!-- Hardware Notch -->
+            <div class="phone-notch-bar">
+              <div class="phone-speaker"></div>
+              <div class="phone-camera-dot"></div>
+            </div>
+
+            <!-- Inner Screen -->
+            <div class="phone-inner-display">
+              <!-- App Bar -->
+              <div class="phone-app-header">
+                <h3>Bulk Order</h3>
+                <div class="phone-header-sub">NGO Resource Aggregator</div>
+              </div>
+
+              <!-- Scrollable Body -->
+              <div class="phone-body-content">
+                <!-- Material Field -->
+                <div class="bulk-form-group">
+                  <label class="bulk-form-label" for="bulk-material-select">Material</label>
+                  <select id="bulk-material-select" class="bulk-select-input">
+                    <option value="Copper Wire" selected>Copper Wire</option>
+                    <option value="Cardboard">Cardboard</option>
+                    <option value="Aluminium Scrap">Aluminium Scrap</option>
+                    <option value="E-Waste Circuit Boards">E-Waste Circuit Boards</option>
+                  </select>
+                </div>
+
+                <!-- Quantity Needed Field -->
+                <div class="bulk-form-group">
+                  <label class="bulk-form-label" for="bulk-qty-input">Quantity needed (kg)</label>
+                  <input
+                    type="number"
+                    id="bulk-qty-input"
+                    class="bulk-number-input"
+                    value="50"
+                    min="1"
+                    max="10000"
+                  />
+                </div>
+
+                <!-- Radius Limit Field -->
+                <div class="bulk-form-group">
+                  <label class="bulk-form-label" for="bulk-radius-input">Max Search Radius</label>
+                  <select id="bulk-radius-input" class="bulk-select-input">
+                    <option value="10">Within 10 km (Hyperlocal)</option>
+                    <option value="30" selected>Within 30 km (District)</option>
+                    <option value="100">Within 100 km (State)</option>
+                  </select>
+                </div>
+
+                <!-- Check Availability Button -->
+                <button id="bulk-check-btn" class="btn-bulk-check">Check Availability</button>
+
+                <!-- Feasibility Output Card -->
+                <div id="bulk-result-card" class="bulk-result-container">
+                  <!-- Populated dynamically (Available: 65 kg, Avg price: Rs. 542/kg, Status: Feasible, Across 2 nearby sellers) -->
+                </div>
+
+                <!-- Consolidated Procurement Button -->
+                <button id="bulk-order-submit-btn" class="btn-bulk-procure">
+                  Place Consolidated Bulk Order
+                </button>
+              </div>
+
+              <!-- Phone Bottom Navigation -->
+              <nav class="phone-bottom-nav">
+                <button class="app-nav-item" data-target-tab="home">Home</button>
+                <button class="app-nav-item" data-target-tab="search">Search</button>
+                <button class="app-nav-item" data-target-tab="orders">Orders</button>
+              </nav>
+            </div>
+          </div>
+
+          <div class="phone-column-caption">
+            NGO bulk order feasibility check
+          </div>
+        </div>
+
+      </div>
+
+      <!-- =====================================================================
+           MODE B: UNIFIED SINGLE APP EXPERIENCE (RESPONSIVE WEB APP)
+           ===================================================================== -->
+      <div class="single-app-wrapper">
+        <div class="single-app-frame">
+          <!-- Top Header -->
+          <div class="phone-app-header">
+            <h3>ScrapConnect</h3>
+            <div class="phone-header-sub action-change-location" style="cursor:pointer;">
+              <span>📍</span> <span class="user-current-location-label">Kozhikode Center</span>
+            </div>
+          </div>
+
+          <!-- Tab Bar -->
+          <div class="single-nav-tabs-header">
+            <button class="nav-tab-pill active" onclick="window.showSingleTab('home')">Home</button>
+            <button class="nav-tab-pill" onclick="window.showSingleTab('search')">Search</button>
+            <button class="nav-tab-pill" onclick="window.showSingleTab('bulk')">NGO Bulk</button>
+            <button class="nav-tab-pill" onclick="window.showSingleTab('map')">Live Map</button>
+            <button class="nav-tab-pill" onclick="window.showSingleTab('orders')">Orders</button>
+          </div>
+
+          <!-- PANEL: Home -->
+          <div id="panel-home" class="single-screen-panel active">
+            <div class="search-bar-input-box">
+              <span class="search-icon-inside">🔍</span>
+              <input type="text" class="search-input-pill" placeholder="Search scrap..." oninput="window.syncSingleSearch(this.value)" />
+            </div>
+            <div class="category-chips-scroll">
+              <button class="category-chip active" data-cat="all">All</button>
+              <button class="category-chip" data-cat="copper">Copper</button>
+              <button class="category-chip" data-cat="cardboard">Cardboard</button>
+              <button class="category-chip" data-cat="aluminium">Aluminium</button>
+            </div>
+            <div class="section-label-bold">Nearest to you</div>
+            <div class="listings-vertical-list" id="single-home-listings">
+              <!-- Cloned from home -->
+            </div>
+          </div>
+
+          <!-- PANEL: Search -->
+          <div id="panel-search" class="single-screen-panel">
+            <div class="search-query-border-box">
+              <span>🔍</span>
+              <input type="text" id="single-search-input" class="search-active-input" placeholder="Search material..." value="copper" oninput="window.syncSingleSearch(this.value)" />
+            </div>
+            <div class="sorted-by-label">Sorted by distance</div>
+            <div class="listings-vertical-list" id="single-search-listings"></div>
+          </div>
+
+          <!-- PANEL: Bulk Order -->
+          <div id="panel-bulk" class="single-screen-panel">
+            <div class="bulk-form-group">
+              <label class="bulk-form-label">Material</label>
+              <select id="single-bulk-material" class="bulk-select-input">
+                <option value="Copper Wire">Copper Wire</option>
+                <option value="Cardboard">Cardboard</option>
+                <option value="Aluminium Scrap">Aluminium Scrap</option>
+                <option value="E-Waste Circuit Boards">E-Waste Circuit Boards</option>
+              </select>
+            </div>
+            <div class="bulk-form-group">
+              <label class="bulk-form-label">Quantity needed (kg)</label>
+              <input type="number" id="single-bulk-qty" class="bulk-number-input" value="50" min="1" />
+            </div>
+            <button class="btn-bulk-check" onclick="window.runSingleBulkCheck()">Check Availability</button>
+            <div id="single-bulk-result"></div>
+          </div>
+
+          <!-- PANEL: Live Map -->
+          <div id="panel-map" class="single-screen-panel">
+            <div class="map-view-container">
+              <div id="leaflet-map-canvas"></div>
+              <div class="map-legend-box">
+                <div class="legend-item">
+                  <span class="legend-dot legend-user"></span>
+                  <span>Your GPS Location</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot legend-scrap"></span>
+                  <span>Nearby Scrap Sellers</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL: Orders & Tracking -->
+          <div id="panel-orders" class="single-screen-panel">
+            <h4 style="font-size:1rem; font-weight:700;">Active Pickups & Circular Sourcing</h4>
+            <div id="orders-list-container" class="orders-list-wrapper"></div>
+          </div>
+
+          <!-- Single App Bottom Nav -->
+          <nav class="phone-bottom-nav single-bottom-nav">
+            <button class="app-nav-item active" data-target-tab="home">Home</button>
+            <button class="app-nav-item" data-target-tab="search">Search</button>
+            <button class="app-nav-item" data-target-tab="orders">Orders</button>
+          </nav>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       MODAL: Item Detail Drawer
+       ========================================================================= -->
+  <div id="item-detail-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header-bar">
+        <h3>Listing Details</h3>
+        <button class="modal-close-btn" aria-label="Close modal">✕</button>
+      </div>
+      <div id="item-detail-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: Location Switcher & GPS Simulator
+       ========================================================================= -->
+  <div id="location-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header-bar">
+        <h3>📍 Set Current Location</h3>
+        <button class="modal-close-btn" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body-padding">
+        <p style="font-size:0.84rem; color:#4b5563; margin-bottom:14px;">
+          Select a locality preset or fetch your browser GPS. Distance to all scrap yards recalculates immediately.
+        </p>
+        <form id="form-select-location" class="form-stack">
+          <div class="form-field">
+            <label for="location-preset-select">Location Presets</label>
+            <select id="location-preset-select" class="form-input"></select>
+          </div>
+          <button type="submit" class="btn-primary" style="padding:11px;">Update Location</button>
+          <div style="text-align:center; font-size:0.8rem; color:#9ca3af; margin: 4px 0;">— OR —</div>
+          <button type="button" id="btn-use-real-gps" class="btn-secondary" style="padding:11px;">
+            📡 Use My Device's Live GPS
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: Post New Scrap Listing (Seller Portal)
+       ========================================================================= -->
+  <div id="add-listing-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header-bar">
+        <h3>📦 Post New Scrap Listing</h3>
+        <button class="modal-close-btn" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body-padding">
+        <form id="form-add-listing" class="form-stack">
+          <div class="form-field">
+            <label for="f-material">Material Type</label>
+            <select id="f-material" name="material" class="form-input" required>
+              <option value="Copper Wire">Copper Wire</option>
+              <option value="Cardboard">Cardboard</option>
+              <option value="Aluminium Scrap">Aluminium Scrap</option>
+              <option value="E-Waste Circuit Boards">E-Waste Circuit Boards</option>
+              <option value="Brass Scrap">Brass Scrap</option>
+              <option value="Iron Scrap">Iron & Steel Scrap</option>
+            </select>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div class="form-field">
+              <label for="f-quantity">Quantity (kg)</label>
+              <input type="number" id="f-quantity" name="quantity" class="form-input" placeholder="e.g. 50" min="1" required />
+            </div>
+            <div class="form-field">
+              <label for="f-price">Price / kg (Rs.)</label>
+              <input type="number" id="f-price" name="price" class="form-input" placeholder="e.g. 540" min="1" required />
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="f-seller">Seller / Business Name</label>
+            <input type="text" id="f-seller" name="sellerName" class="form-input" placeholder="e.g. Green Traders Yard" required />
+          </div>
+          <div class="form-field">
+            <label for="f-description">Condition & Description</label>
+            <textarea id="f-description" name="description" class="form-input" rows="2" placeholder="Clean stripped, bundled, dry..."></textarea>
+          </div>
+          <button type="submit" class="btn-primary" style="padding:12px; margin-top:4px;">Publish Listing</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: Premium Subscription
+       ========================================================================= -->
+  <div id="premium-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header-bar">
+        <h3>👑 ScrapConnect Premium</h3>
+        <button class="modal-close-btn" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body-padding" style="text-align:center;">
+        <div style="font-size:2.4rem; margin-bottom:8px;">🚚</div>
+        <h4 style="font-size:1.15rem; font-weight:800; color:#111827;">Zero Delivery & Pickup Fees</h4>
+        <p style="font-size:0.84rem; color:#4b5563; margin:8px 0 16px;">
+          Subscribe to waive delivery charges on all scrap pickups, receive NGO bulk priority dispatch, and get certified digital green recycling certificates.
+        </p>
+        <button id="btn-toggle-premium-status" class="btn-primary-golden" onclick="window.togglePremiumPlan()">
+          Upgrade to Premium (₹299/mo)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="app-toast" class="toast-notice"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Application Logic -->
+  <script type="module" src="./app.js"></script>
+
+  <script>
+    // Helper to scroll phone mockup into view when tapped on desktop
+    window.scrollToScreen = function(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        el.classList.add('phone-highlight');
+        setTimeout(() => el.classList.remove('phone-highlight'), 1200);
+      }
+    };
+
+    // Synchronization helpers for Single mode
+    window.syncSingleSearch = function(val) {
+      const homeIn = document.getElementById('home-search-input');
+      const resIn = document.getElementById('results-search-input');
+      if (homeIn) homeIn.value = val;
+      if (resIn) resIn.value = val;
+      const event = new Event('input');
+      if (resIn) resIn.dispatchEvent(event);
+    };
+
+    window.runSingleBulkCheck = function() {
+      const mat = document.getElementById('single-bulk-material').value;
+      const qty = document.getElementById('single-bulk-qty').value;
+      const bMat = document.getElementById('bulk-material-select');
+      const bQty = document.getElementById('bulk-qty-input');
+      if (bMat) bMat.value = mat;
+      if (bQty) bQty.value = qty;
+      const chkBtn = document.getElementById('bulk-check-btn');
+      if (chkBtn) chkBtn.click();
+      const resHtml = document.getElementById('bulk-result-card').innerHTML;
+      document.getElementById('single-bulk-result').innerHTML = resHtml;
+    };
+  </script>
+</body>
+</html>
